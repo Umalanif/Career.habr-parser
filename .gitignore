@@ -1,0 +1,19 @@
+node_modules/
+dist/
+
+# Runtime data
+data/*
+!data/.gitkeep
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.log
+
+# Environment
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db

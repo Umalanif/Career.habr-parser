@@ -1,0 +1,8 @@
+services:
+  habr-scraper:
+    build: .
+    environment:
+      DATABASE_URL: file:./data/dev.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

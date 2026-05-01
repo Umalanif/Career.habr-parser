@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Vacancy {
+  id                      Int            @id @default(autoincrement())
+  habrId                  Int            @unique
+  title                   String
+  companyTitle            String
+  remoteWork              Boolean
+  salaryFrom              Int?
+  salaryTo                Int?
+  salaryCurrency          String?
+  salaryFormatted         String
+  predictedSalaryFrom     Int?
+  predictedSalaryTo       Int?
+  predictedSalaryCurrency String?
+  predictedSalaryFormatted String?
+  publishedAt             DateTime
+  href                    String
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  vacancySkills           VacancySkill[]
+}
+
+model Skill {
+  id            Int            @id @default(autoincrement())
+  title         String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  vacancySkills VacancySkill[]
+}
+
+model VacancySkill {
+  vacancyId Int
+  skillId   Int
+  createdAt DateTime @default(now())
+
+  vacancy Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([vacancyId, skillId])
+}

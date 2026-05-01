@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+*.log
+Allhandoff.md
+Plan.md
+SUMMARY.md
+Wall.md
+headerstxt.txt
