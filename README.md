@@ -1,94 +1,79 @@
-# Habr Career Parser
+# Habr Career Parser — parser that collects Habr Career vacancies into a local database.
 
-Habr Career Parser is a small Node.js service that fetches vacancies from the Habr Career frontend API, validates the payload with Zod, and stores normalized vacancy and skill data in a local SQLite database through Prisma. It can run once on demand or stay alive as an hourly scheduled worker using Bree.
+[Features](#features) · [Tech Stack](#tech-stack) · [Quick Start](#quick-start) · [Environment Variables](#environment-variables)
 
-## What the project does
+│ TypeScript vacancy ingestion service with Zod validation, Prisma, SQLite, and Bree scheduling.
 
-- Requests the first page of Habr Career vacancies.
-- Validates the API response with strict Zod schemas.
-- Upserts vacancies and skills into SQLite.
-- Runs on a schedule or as a one-time job.
+## Features
 
-## Project structure
+- Fetches vacancy data from the Habr Career frontend API.
+- Validates the response contract with strict Zod schemas.
+- Upserts vacancies, skills, and relationships into SQLite.
+- Runs once on demand or on an hourly Bree schedule.
+- Includes Docker support and a schema verification script for sample payloads.
 
-- `src/index.ts` starts the scheduler or runs the worker immediately with `--run-now`.
-- `src/workers/vacancies.ts` fetches, validates, and persists vacancies.
-- `src/schemas/habr-vacancies.ts` defines the API contract.
-- `src/scripts/verify-vacancies-schema.ts` validates the checked-in sample payload in `Response.json`.
-- `prisma/schema.prisma` defines the SQLite models.
+## Tech Stack
 
-## Local usage
+```text
+┌────────────┬──────────────────────────────────────────────┐
+│ Layer      │ Technology                                   │
+├────────────┼──────────────────────────────────────────────┤
+│ Runtime    │ Node.js / TypeScript                         │
+├────────────┼──────────────────────────────────────────────┤
+│ HTTP       │ fetch                                         │
+├────────────┼──────────────────────────────────────────────┤
+│ Scheduling │ Bree                                         │
+├────────────┼──────────────────────────────────────────────┤
+│ Database   │ Prisma ORM / SQLite / better-sqlite3        │
+├────────────┼──────────────────────────────────────────────┤
+│ Validation │ Zod                                          │
+├────────────┼──────────────────────────────────────────────┤
+│ Infra      │ Docker / GitHub Actions                     │
+└────────────┴──────────────────────────────────────────────┘
+```
 
-1. Install dependencies:
+## Quick Start
 
 ```bash
+git clone https://github.com/Umalanif/Career.habr-parser.git
+cd Career.habr-parser
+cp .env.example .env
 npm install
-```
-
-2. Create the database schema:
-
-```bash
 npm run prisma:push
-```
-
-3. Build the project:
-
-```bash
 npm run build
-```
-
-4. Run once:
-
-```bash
 npm run start:now
 ```
 
-5. Run the hourly scheduler:
-
-```bash
-npm run start
-```
-
-## Validation
-
-Use the sample payload check when changing the parser or Zod schema:
-
-```bash
-npx tsx src/scripts/verify-vacancies-schema.ts
-```
-
-## Docker + SQLite
-
-SQLite is a local file database, so the database file must be stored outside the container if you want to keep data after restart. This project uses `DATABASE_URL=file:./data/dev.db` and mounts a host directory into `/app/data`.
-
-1. Start the container:
-
-```bash
-docker compose up --build -d
-```
-
-2. The SQLite file will appear on the host in:
+## Environment Variables
 
 ```text
-./data/dev.db
+┌──────────────┬────────────────────────────────────┬──────────┐
+│ Variable     │ Description                        │ Required │
+├──────────────┼────────────────────────────────────┼──────────┤
+│ DATABASE_URL │ SQLite database path               │ No       │
+└──────────────┴────────────────────────────────────┴──────────┘
 ```
 
-3. Stop the service without losing data:
+## Project Structure
 
-```bash
-docker compose down
+```text
+src/
+  index.ts
+  schemas/
+    habr-vacancies.ts
+  scripts/
+    verify-vacancies-schema.ts
+  workers/
+    vacancies.ts
+prisma/
+  schema.prisma
+data/
+  dev.db
+.github/workflows/
+  docker.yml
+Response.json
 ```
 
-The container runs `prisma db push` on startup and then starts the scheduler. If you only want a single parser run in Docker, override the command:
+## License
 
-```bash
-docker compose run --rm habr-scraper sh -c "npx prisma db push && node dist/index.js --run-now"
-```
-
-## Configuration
-
-Copy `.env.example` to `.env` if you want to override the default database path:
-
-```bash
-DATABASE_URL=file:./data/dev.db
-```
+Not specified.
